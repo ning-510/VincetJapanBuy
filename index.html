@@ -12,7 +12,7 @@
         body { 
             overflow-x: hidden; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-            background-color: #F0F0E8; 
+            background-color: #F5F5F7; 
             -webkit-tap-highlight-color: transparent;
         }
         /* 毛玻璃效果 */
@@ -35,37 +35,42 @@
         @keyframes fadeInUp {
             to { opacity: 1; transform: translateY(0); }
         }
+        /* 避免長按選取 */
+        .no-select {
+            user-select: none;
+            -webkit-user-select: none;
+        }
     </style>
 </head>
 <body class="text-[#1D1D1F] antialiased">
 
-    <div id="app" class="w-full max-w-md mx-auto bg-[#F0F0E8] min-h-screen relative flex flex-col">
+    <div id="app" class="w-full max-w-md mx-auto bg-[#F5F5F7] min-h-screen relative flex flex-col">
         
         <!-- 頂部導覽列 (毛玻璃) -->
-        <header class="glass sticky top-0 z-40 px-5 pt-6 pb-3 border-b border-gray-200/50">
+        <header class="glass sticky top-0 z-40 px-5 pt-6 pb-3 border-b border-gray-200/50 shadow-sm">
             <div class="flex justify-between items-end mb-4">
                 <div>
                     <div class="flex items-center gap-2 mb-1">
                         <span id="sync-status" class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse"></span>
-                        <p class="text-xs font-semibold text-slate-500 uppercase tracking-widest">Cloud Sync Active</p>
+                        <p id="sync-text" class="text-xs font-semibold text-slate-500 uppercase tracking-widest">連線中...</p>
                     </div>
                     <h1 class="text-3xl font-extrabold tracking-tight text-slate-800">購物任務</h1>
                 </div>
-                <!-- 後台切換按鈕 -->
+                <!-- 後台切換按鈕 (齒輪) -->
                 <button onclick="window.toggleView()" id="view-toggle-btn" class="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors">
                     <i class="fa-solid fa-gear"></i>
                 </button>
             </div>
 
-            <!-- 分類切換 (四大分頁：藥妝 / 三井 / CiiNA / 折扣) -->
+            <!-- 分類切換 (三大分頁) -->
             <div class="bg-slate-200/60 p-1 rounded-2xl flex relative overflow-x-auto gap-1" id="tab-container">
-                <button onclick="window.switchTab('drugstore')" id="tab-drugstore" class="relative z-10 flex-1 min-w-[60px] py-2.5 text-sm font-bold rounded-xl text-center transition-colors text-slate-900 bg-white shadow-sm whitespace-nowrap">
+                <button onclick="window.switchTab('drugstore')" id="tab-drugstore" class="relative z-10 flex-1 min-w-[60px] py-2.5 text-base font-bold rounded-xl text-center transition-colors text-slate-900 bg-white shadow-sm whitespace-nowrap">
                     藥妝
                 </button>
-                <button onclick="window.switchTab('mitsui')" id="tab-mitsui" class="relative z-10 flex-1 min-w-[60px] py-2.5 text-sm font-bold rounded-xl text-center transition-colors text-slate-500 whitespace-nowrap">
+                <button onclick="window.switchTab('mitsui')" id="tab-mitsui" class="relative z-10 flex-1 min-w-[60px] py-2.5 text-base font-bold rounded-xl text-center transition-colors text-slate-500 whitespace-nowrap">
                     三井
                 </button>
-                <button onclick="window.switchTab('ciina')" id="tab-ciina" class="relative z-10 flex-1 min-w-[60px] py-2.5 text-sm font-bold rounded-xl text-center transition-colors text-slate-500 whitespace-nowrap">
+                <button onclick="window.switchTab('ciina')" id="tab-ciina" class="relative z-10 flex-1 min-w-[60px] py-2.5 text-base font-bold rounded-xl text-center transition-colors text-slate-500 whitespace-nowrap">
                     CiiNA
                 </button>
             </div>
@@ -79,30 +84,8 @@
             </div>
         </header>
 
-        <!-- 視圖 0：首次設定 URL 畫面 -->
-        <main id="setup-view" class="flex-1 flex flex-col items-center justify-center p-6 bg-[#F0F0E8] z-50 absolute inset-0 min-h-screen">
-            <div class="bg-white p-8 rounded-[32px] shadow-premium w-full max-w-sm text-center fade-enter">
-                <div class="w-20 h-20 mx-auto bg-slate-100 rounded-full flex items-center justify-center mb-6 text-4xl">
-                    🔗
-                </div>
-                <h2 class="text-2xl font-extrabold text-slate-800 mb-2">連結專屬清單</h2>
-                <p class="text-slate-500 text-sm mb-6 leading-relaxed">
-                    請貼上您的 Google 表格資料庫網址 (Web App URL)。設定只需一次。
-                </p>
-                <div class="space-y-4">
-                    <input type="url" id="input-gas-url" placeholder="https://script.google.com/..." class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500 focus:bg-white transition-all text-slate-700">
-                    <button onclick="window.saveUrlAndInit()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold text-lg py-3.5 rounded-2xl shadow-lg shadow-slate-300 transition-transform active:scale-95">
-                        確認連結
-                    </button>
-                    <button onclick="window.useDemoMode()" class="w-full bg-transparent text-slate-400 font-medium text-sm py-2 hover:text-slate-600 transition-colors">
-                        先試用展示模式
-                    </button>
-                </div>
-            </div>
-        </main>
-
         <!-- 視圖 1：清單瀏覽區 -->
-        <main id="list-view" class="hidden flex-1 flex-col h-full p-4 pb-32">
+        <main id="list-view" class="flex-1 flex flex-col h-full p-4 pb-32">
             <!-- 尚未購買區 -->
             <div id="active-list" class="space-y-6"></div>
             
@@ -121,8 +104,8 @@
             </div>
         </main>
 
-        <!-- 視圖 3：新增商品後台 -->
-        <main id="admin-view" class="hidden flex-1 p-5 pb-24 bg-[#F0F0E8]">
+        <!-- 視圖 2：新增商品後台 -->
+        <main id="admin-view" class="hidden flex-1 p-5 pb-24 bg-[#F5F5F7]">
             <h2 class="text-2xl font-extrabold mb-6 flex items-center gap-2 text-slate-800">
                 <i class="fa-solid fa-pen-to-square"></i> 新增購物任務
             </h2>
@@ -132,15 +115,15 @@
                 <div class="bg-white p-5 rounded-3xl shadow-premium">
                     <label class="block text-base font-bold text-slate-700 mb-3">選擇分類</label>
                     <div class="grid grid-cols-3 gap-2">
-                        <label class="cursor-pointer">
+                        <label class="cursor-pointer no-select">
                             <input type="radio" name="category" value="drugstore" class="peer sr-only" checked onchange="window.handleCategoryChange()">
                             <div class="text-center py-3 rounded-2xl bg-slate-50 text-slate-500 font-bold peer-checked:bg-slate-800 peer-checked:text-white transition-colors">藥妝</div>
                         </label>
-                        <label class="cursor-pointer">
+                        <label class="cursor-pointer no-select">
                             <input type="radio" name="category" value="mitsui" class="peer sr-only" onchange="window.handleCategoryChange()">
                             <div class="text-center py-3 rounded-2xl bg-slate-50 text-slate-500 font-bold peer-checked:bg-slate-800 peer-checked:text-white transition-colors">三井</div>
                         </label>
-                        <label class="cursor-pointer">
+                        <label class="cursor-pointer no-select">
                             <input type="radio" name="category" value="ciina" class="peer sr-only" onchange="window.handleCategoryChange()">
                             <div class="text-center py-3 rounded-2xl bg-slate-50 text-slate-500 font-bold peer-checked:bg-slate-800 peer-checked:text-white transition-colors">CiiNA</div>
                         </label>
@@ -156,8 +139,8 @@
 
                     <div id="product-details-fields" class="space-y-5">
                         <div>
-                            <label class="block text-base font-bold text-slate-700 mb-2">圖片網址 <span class="text-slate-400 text-sm font-normal">(三井或純品牌可不填)</span></label>
-                            <input type="url" id="input-image" placeholder="貼上圖片連結" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:bg-white transition-all">
+                            <label class="block text-base font-bold text-slate-700 mb-2">圖片網址 <span class="text-slate-400 text-sm font-normal">(網路搜圖右鍵複製網址)</span></label>
+                            <input type="url" id="input-image" placeholder="貼上圖片連結 (不填則顯示純文字)" class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-4 py-3.5 text-lg focus:outline-none focus:ring-2 focus:ring-slate-500 focus:bg-white transition-all">
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
@@ -178,8 +161,8 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold text-xl py-4 rounded-2xl shadow-lg shadow-slate-300 transition-transform active:scale-95">
-                    加入雲端任務
+                <button type="submit" id="submit-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold text-xl py-4 rounded-2xl shadow-lg shadow-slate-300 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> 加入雲端任務
                 </button>
             </form>
         </main>
@@ -189,120 +172,85 @@
             <i class="fa-solid fa-circle-check text-green-400 text-xl"></i>
             <span id="toast-msg">提示訊息</span>
         </div>
-
     </div>
 
+    <!-- 替換為 Google Apps Script 專用邏輯 -->
     <script>
-        let GAS_URL = "";
-        let products = [];
-        let isAdminView = false;
-        let currentTab = 'drugstore';
+        // ==========================================
+        // 🔴 請在這裡貼上你的 Google Apps Script 網址 🔴
+        // ==========================================
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxrx-09K6CBZ-TPdhT8L2RjfbkYLdqdiYvzOXtzluSnYhRe38zsn8bj7C1Ik45YS7m/exec"; 
 
-        // 檢查是否已設定 URL
-        window.onload = function() {
-            const savedUrl = localStorage.getItem('dadShoppingGasUrl');
-            if (savedUrl) {
-                GAS_URL = savedUrl;
-                document.getElementById('setup-view').classList.add('hidden');
-                document.getElementById('list-view').classList.remove('hidden');
-                document.getElementById('list-view').classList.add('flex');
-                initApp();
-            } else {
-                // 顯示設定畫面，隱藏其他UI元素避免干擾
-                document.getElementById('setup-view').classList.remove('hidden');
-                document.querySelector('header').classList.add('hidden');
-                document.getElementById('list-view').classList.add('hidden');
-                document.getElementById('list-view').classList.remove('flex');
-            }
-        };
+        window.products = [];
+        window.currentTab = 'drugstore';
+        window.isAdminView = false;
+        let isFetching = false;
 
-        window.saveUrlAndInit = function() {
-            const urlInput = document.getElementById('input-gas-url').value.trim();
-            if (!urlInput.startsWith('https://script.google.com/')) {
-                alert('請輸入正確的 Google Apps Script 網址');
+        // 初始化：從 Google 表格載入資料
+        async function initGoogleSheet() {
+            if (!SCRIPT_URL || SCRIPT_URL.includes("請在這裡貼上")) {
+                setSyncStatus('error', '尚未設定網址');
+                window.showToast('請先在程式碼中填寫 SCRIPT_URL');
                 return;
             }
-            
-            GAS_URL = urlInput;
-            localStorage.setItem('dadShoppingGasUrl', GAS_URL);
-            
-            // 切換畫面
-            document.getElementById('setup-view').classList.add('hidden');
-            document.querySelector('header').classList.remove('hidden');
-            document.getElementById('list-view').classList.remove('hidden');
-            document.getElementById('list-view').classList.add('flex');
-            
-            initApp();
-        };
 
-        window.useDemoMode = function() {
-            showToast('進入展示模式 (無雲端同步)');
-            document.getElementById('setup-view').classList.add('hidden');
-            document.querySelector('header').classList.remove('hidden');
-            document.getElementById('list-view').classList.remove('hidden');
-            document.getElementById('list-view').classList.add('flex');
-            
-            // 載入假資料
-            products = [
-                { id: '1', category: 'drugstore', name: '合利他命 EX Plus 270錠', image: 'https://images.unsplash.com/photo-1584308666744-24d5e4708e13?w=800&q=80', localPrice: '5500', twPrice: '1800', target: '一定要買到2罐喔！', bought: false },
-                { id: '2', category: 'mitsui', name: 'Nike Factory Store', image: '', localPrice: '', twPrice: '', target: '', bought: false },
-                { id: '3', category: 'ciina', name: 'MUJI 無印良品', image: '', localPrice: '', twPrice: '', target: '', bought: false }
-            ];
-            renderList();
-            document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-slate-300';
-        };
-
-        // 清除 URL 設定 (長按齒輪可觸發)
-        window.clearSetup = function() {
-            if(confirm('確定要清除目前的資料庫連結並重新設定嗎？')) {
-                localStorage.removeItem('dadShoppingGasUrl');
-                location.reload();
+            if (!SCRIPT_URL.endsWith('/exec')) {
+                setSyncStatus('error', '網址結尾錯誤');
+                window.showToast('網址必須以 /exec 結尾');
+                return;
             }
-        }
-        
-        // 為齒輪按鈕增加長按事件來清除設定
-        let pressTimer;
-        document.getElementById('view-toggle-btn').addEventListener('touchstart', function(e) {
-            pressTimer = window.setTimeout(window.clearSetup, 2000); // 長按 2 秒
-        });
-        document.getElementById('view-toggle-btn').addEventListener('touchend', function(e) {
-            clearTimeout(pressTimer);
-        });
-        document.getElementById('view-toggle-btn').addEventListener('mousedown', function(e) {
-            pressTimer = window.setTimeout(window.clearSetup, 2000);
-        });
-        document.getElementById('view-toggle-btn').addEventListener('mouseup', function(e) {
-            clearTimeout(pressTimer);
-        });
 
-
-        async function initApp() {
-            if (!GAS_URL) return;
+            setSyncStatus('syncing', '載入資料中...');
             
             try {
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+                const response = await fetch(SCRIPT_URL, { redirect: 'follow' });
                 
-                const response = await fetch(GAS_URL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const data = await response.json();
-                products = data;
                 
-                renderList();
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
-            } catch (e) {
-                console.error("Fetch error:", e);
-                showToast("連線失敗，請檢查網路");
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-red-500';
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+
+                window.products = Array.isArray(data) ? data : [];
+                setSyncStatus('success', 'Google 表格已連線');
+                window.renderList();
+
+            } catch (error) {
+                console.error("載入失敗:", error);
+                setSyncStatus('error', '連線失敗 (CORS或權限問題)');
+                window.showToast('無法讀取表格，請檢查發布權限是否為「所有人」');
             }
         }
 
+        // 狀態燈號切換
+        function setSyncStatus(status, text) {
+            const statusEl = document.getElementById('sync-status');
+            const textEl = document.getElementById('sync-text');
+            textEl.innerText = text;
+            
+            statusEl.className = 'inline-block w-2.5 h-2.5 rounded-full';
+            if (status === 'syncing') {
+                statusEl.classList.add('bg-amber-400', 'animate-pulse');
+            } else if (status === 'success') {
+                statusEl.classList.add('bg-emerald-500', 'shadow-[0_0_8px_rgba(16,185,129,0.5)]');
+            } else {
+                statusEl.classList.add('bg-red-500');
+            }
+        }
+
+        // UI 切換邏輯
         window.toggleView = function() {
-            isAdminView = !isAdminView;
+            window.isAdminView = !window.isAdminView;
             const listView = document.getElementById('list-view');
             const adminView = document.getElementById('admin-view');
             const toggleBtn = document.getElementById('view-toggle-btn');
             const tabContainer = document.getElementById('tab-container');
             
-            if (isAdminView) {
+            if (window.isAdminView) {
                 listView.classList.add('hidden');
                 adminView.classList.remove('hidden');
                 tabContainer.classList.add('opacity-0', 'pointer-events-none');
@@ -315,15 +263,12 @@
                 toggleBtn.innerHTML = '<i class="fa-solid fa-gear"></i>';
                 toggleBtn.classList.replace('bg-red-50', 'bg-white');
                 toggleBtn.classList.replace('text-red-600', 'text-slate-600');
-                
                 listView.classList.remove('hidden');
-                // 離開後台時重新抓取一次最新資料
-                initApp();
             }
         };
 
         window.switchTab = function(tabId) {
-            currentTab = tabId;
+            window.currentTab = tabId;
             const tabs = ['drugstore', 'mitsui', 'ciina'];
             
             tabs.forEach(t => {
@@ -336,13 +281,7 @@
                     el.classList.add('text-slate-500');
                 }
             });
-
-            const listView = document.getElementById('list-view');
-            const progressContainer = document.getElementById('progress-container');
-
-            listView.classList.remove('hidden');
-            progressContainer.style.visibility = 'visible';
-            renderList();
+            window.renderList();
         };
 
         window.handleCategoryChange = function() {
@@ -356,44 +295,77 @@
             }
         };
 
-        window.toggleBought = async function(id) {
-            const product = products.find(p => p.id === id);
-            if (!product) return;
-
-            const newBoughtState = !product.bought;
-            
-            // 畫面先瞬間更新 (Optimistic UI) 保持順暢
-            product.bought = newBoughtState;
-            if (newBoughtState) {
-                showToast('已移至下方清單');
-            }
-            renderList();
-
-            // 在背景同步至 Google 表格
+        // 發送資料到 Google Apps Script (處理新增/更新/刪除)
+        async function sendToGoogleSheet(payload) {
             try {
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
-                await fetch(GAS_URL, {
+                // 關鍵解法：使用 text/plain 繞過 CORS preflight OPTIONS 請求
+                const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'update',
-                        id: id,
-                        bought: newBoughtState
-                    })
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify(payload)
                 });
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
-            } catch (err) {
-                console.error("Update error:", err);
-                showToast('更新失敗，將在下次開啟時重試');
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-red-500';
+                const result = await response.json();
+                return result;
+            } catch (error) {
+                console.error("發送資料失敗:", error);
+                throw error;
+            }
+        }
+
+        // 打勾 / 復原
+        window.toggleBought = async function(id) {
+            if (isFetching) return;
+            
+            const productIndex = window.products.findIndex(p => p.id === id);
+            if (productIndex === -1) return;
+
+            // 先在本地改畫面，讓爸爸感覺順暢不用等
+            const newBoughtState = !window.products[productIndex].bought;
+            window.products[productIndex].bought = newBoughtState;
+            window.renderList();
+            
+            if (newBoughtState) {
+                window.showToast('✅ 已移至下方清單');
+            } else {
+                window.showToast('↩️ 已復原');
+            }
+
+            // 背景同步到 Google 表格
+            isFetching = true;
+            setSyncStatus('syncing', '同步中...');
+            try {
+                await sendToGoogleSheet({
+                    action: 'update',
+                    id: id,
+                    bought: newBoughtState
+                });
+                setSyncStatus('success', '已同步');
+            } catch (error) {
+                window.showToast('網路不穩，同步失敗');
+                setSyncStatus('error', '同步失敗');
+                // 失敗的話退回狀態
+                window.products[productIndex].bought = !newBoughtState;
+                window.renderList();
+            } finally {
+                isFetching = false;
             }
         };
 
+        // 新增商品
         window.handleAddSubmit = async function(event) {
             event.preventDefault();
+            if (isFetching) return;
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> 寫入表格中...';
+            isFetching = true;
+
             const selectedCategory = document.querySelector('input[name="category"]:checked').value;
             
-            const newProduct = {
+            const newProductData = {
                 action: 'add',
                 category: selectedCategory,
                 name: document.getElementById('input-name').value.trim(),
@@ -401,47 +373,76 @@
                 localPrice: document.getElementById('input-local-price') ? document.getElementById('input-local-price').value.trim() : '',
                 twPrice: document.getElementById('input-tw-price') ? document.getElementById('input-tw-price').value.trim() : '',
                 target: document.getElementById('input-target') ? document.getElementById('input-target').value.trim() : '',
-                bought: false
             };
 
-            // 關閉新增畫面並切換分類
-            document.getElementById('add-form').reset();
-            window.toggleView(); 
-            window.switchTab(selectedCategory);
-            showToast('同步至雲端中...');
-            document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
-
             try {
-                const response = await fetch(GAS_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(newProduct)
-                });
-                const resData = await response.json();
+                const result = await sendToGoogleSheet(newProductData);
                 
-                // 將新商品推入本地陣列以顯示
-                newProduct.id = resData.id;
-                products.push(newProduct);
-                renderList();
-                showToast('✅ 已成功加入 Google 表格！');
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-emerald-500';
-            } catch (err) {
-                console.error("Add error:", err);
-                showToast('⚠️ 新增失敗，請檢查網路');
-                document.getElementById('sync-status').className = 'inline-block w-2.5 h-2.5 rounded-full bg-red-500';
+                if (result && result.success) {
+                    // 加入本地陣列並重新渲染
+                    window.products.push({
+                        id: result.id,
+                        bought: false,
+                        ...newProductData
+                    });
+                    
+                    document.getElementById('add-form').reset();
+                    window.toggleView(); 
+                    window.switchTab(selectedCategory);
+                    window.showToast('📝 已成功寫入 Google 表格！');
+                } else {
+                    throw new Error(result.error || "未知錯誤");
+                }
+            } catch (error) {
+                window.showToast('寫入失敗，請稍後再試');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> 加入購物清單';
+                isFetching = false;
             }
         };
 
-        function renderList() {
+        // 刪除項目 (雙擊)
+        window.deleteItem = async function(id) {
+            if(confirm("確定要從 Google 表格永久刪除此項目嗎？")) {
+                const productIndex = window.products.findIndex(p => p.id === id);
+                if (productIndex === -1) return;
+
+                const backupProduct = window.products[productIndex];
+                window.products.splice(productIndex, 1);
+                window.renderList();
+                
+                isFetching = true;
+                setSyncStatus('syncing', '刪除中...');
+                try {
+                    await sendToGoogleSheet({ action: 'delete', id: id });
+                    window.showToast('🗑️ 已永久刪除');
+                    setSyncStatus('success', '已同步');
+                } catch(e) {
+                    window.showToast('刪除失敗');
+                    window.products.splice(productIndex, 0, backupProduct);
+                    window.renderList();
+                    setSyncStatus('error', '刪除失敗');
+                } finally {
+                    isFetching = false;
+                }
+            }
+        };
+
+        window.renderList = function() {
             const activeContainer = document.getElementById('active-list');
             const completedContainer = document.getElementById('completed-list');
             const completedSection = document.getElementById('completed-section');
             const emptyState = document.getElementById('empty-state');
             
+            if(!activeContainer || !completedContainer || !completedSection || !emptyState) return; 
+
             activeContainer.innerHTML = '';
             completedContainer.innerHTML = '';
             
-            const filteredProducts = products.filter(p => p.category === currentTab);
+            let filteredProducts = window.products.filter(p => p.category === window.currentTab);
+            filteredProducts.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+
             const activeProducts = filteredProducts.filter(p => !p.bought);
             const completedProducts = filteredProducts.filter(p => p.bought);
             
@@ -466,33 +467,31 @@
             }
 
             updateProgress();
-        }
+        };
 
         function createCard(product) {
             const card = document.createElement('div');
-            // 如果沒有填寫圖片和價錢，自動變成極簡純文字品牌卡 (三井與 CiiNA 通用)
-            const isBrandOnly = !product.image && !product.localPrice && !product.twPrice && !product.target;
+            const isBrandOnly = window.currentTab === 'mitsui' || (!product.image && !product.localPrice && !product.twPrice && !product.target);
 
             if (isBrandOnly) {
                 card.className = `bg-white rounded-[28px] shadow-sm p-6 fade-enter flex justify-between items-center transition-all-spring ${product.bought ? 'opacity-60 scale-95' : ''}`;
                 card.innerHTML = `
-                    <div class="flex-1 pr-4">
+                    <div class="flex-1 pr-4" ${product.bought ? `ondblclick="window.deleteItem('${product.id}')"` : ''}>
                         <h3 class="text-2xl font-bold text-slate-800 tracking-wide">${product.name}</h3>
                     </div>
-                    <button onclick="window.toggleBought('${product.id}')" class="w-16 h-16 shrink-0 rounded-full flex items-center justify-center transition-all-spring ${product.bought ? 'bg-slate-200 text-slate-400' : 'bg-slate-800 text-white shadow-lg shadow-slate-300 active:scale-90'}">
+                    <button onclick="window.toggleBought('${product.id}')" class="w-16 h-16 shrink-0 rounded-full flex items-center justify-center transition-all-spring ${product.bought ? 'bg-slate-200 text-slate-400' : 'bg-[#1D1D1F] text-white shadow-lg shadow-slate-300 active:scale-90'}">
                         <i class="fa-solid ${product.bought ? 'fa-rotate-left' : 'fa-check'} text-3xl"></i>
                     </button>
                 `;
             } else {
-                // 如果有圖片破圖，顯示灰色預設圖
                 const defaultImg = 'https://images.unsplash.com/photo-1584308666744-24d5e4708e13?auto=format&fit=crop&q=80&w=800';
                 const imgSrc = product.image ? product.image : defaultImg;
                 
                 card.className = `bg-white rounded-[32px] shadow-premium overflow-hidden fade-enter relative transition-all-spring ${product.bought ? 'scale-[0.97] opacity-75' : ''}`;
                 card.innerHTML = `
-                    <div class="w-full h-72 bg-slate-100 relative">
+                    <div class="w-full h-72 bg-slate-100 relative" ${product.bought ? `ondblclick="window.deleteItem('${product.id}')"` : ''}>
                         <img src="${imgSrc}" alt="${product.name}" class="w-full h-full object-cover" onerror="this.src='${defaultImg}'">
-                        ${product.bought ? `<div class="absolute inset-0 bg-white/50 backdrop-blur-[1px]"></div>` : ''}
+                        ${product.bought ? `<div class="absolute inset-0 bg-white/60 backdrop-blur-[2px]"></div>` : ''}
                     </div>
                     
                     <div class="p-6">
@@ -504,13 +503,13 @@
                         </div>
                         
                         ${product.target ? `
-                        <div class="mb-6 bg-slate-50 border border-slate-100 p-4 rounded-2xl text-lg text-slate-600 font-medium flex gap-3 items-start">
-                            <i class="fa-solid fa-thumbtack mt-1 text-slate-400"></i>
+                        <div class="mb-6 bg-amber-50/50 border border-amber-100 p-4 rounded-2xl text-lg text-slate-700 font-medium flex gap-3 items-start">
+                            <i class="fa-solid fa-thumbtack mt-1 text-amber-500"></i>
                             <p>${product.target}</p>
                         </div>` : ''}
 
-                        <button onclick="window.toggleBought('${product.id}')" class="w-full py-5 rounded-2xl text-xl font-bold flex items-center justify-center gap-2 transition-all-spring ${product.bought ? 'bg-slate-100 text-slate-500 active:bg-slate-200' : 'bg-[#1D1D1F] text-white shadow-[0_8px_20px_rgba(29,29,31,0.25)] active:scale-[0.98]'}">
-                            ${product.bought ? '<i class="fa-solid fa-rotate-left"></i> 復原' : '<i class="fa-solid fa-check"></i> 買到了！(點擊打勾)'}
+                        <button onclick="window.toggleBought('${product.id}')" class="w-full py-5 rounded-2xl text-xl font-bold flex items-center justify-center gap-2 transition-all-spring no-select ${product.bought ? 'bg-slate-100 text-slate-500 active:bg-slate-200' : 'bg-[#1D1D1F] text-white shadow-[0_8px_20px_rgba(29,29,31,0.25)] active:scale-[0.98]'}">
+                            ${product.bought ? '<i class="fa-solid fa-rotate-left"></i> 復原 (雙擊上方圖片刪除)' : '<i class="fa-solid fa-check"></i> 買到了！(點擊打勾)'}
                         </button>
                     </div>
                 `;
@@ -519,7 +518,7 @@
         }
 
         function updateProgress() {
-            const filteredProducts = products.filter(p => p.category === currentTab);
+            const filteredProducts = window.products.filter(p => p.category === window.currentTab);
             const total = filteredProducts.length;
             const boughtCount = filteredProducts.filter(p => p.bought).length;
             const percentage = total === 0 ? 0 : Math.round((boughtCount / total) * 100);
@@ -542,7 +541,7 @@
         }
 
         let toastTimeout;
-        function showToast(message) {
+        window.showToast = function(message) {
             const toast = document.getElementById('toast');
             document.getElementById('toast-msg').innerText = message;
             toast.style.opacity = '1';
@@ -553,14 +552,12 @@
                 toast.style.opacity = '0';
                 toast.style.transform = 'translate(-50%, 0)';
             }, 2500);
-        }
-
-        // 啟動應用程式
-        initApp();
+        };
         
-        // 為了確保後台切換三井時立刻生效
+        // 載入完成後初始化
         document.addEventListener('DOMContentLoaded', () => {
-            handleCategoryChange();
+            window.handleCategoryChange();
+            initGoogleSheet(); // 啟動 Google 表格連線
         });
     </script>
 </body>
